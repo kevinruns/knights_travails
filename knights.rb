@@ -4,15 +4,16 @@ class Board
 
   def initialize
     @board_size = 8
-    @board = Array.new(@board_size){Array.new(@board_size, '-')}
+    @board = Array.new(@board_size) { Array.new(@board_size, '-') }
   end
 
   def square_visited(coord)
     rank = coord[0]
     file = coord[1]
     return true if @board[rank][file] == 'x'
+
     @board[rank][file] = 'x'
-    return false
+    false
   end
 
   def print_board
@@ -49,30 +50,30 @@ class Knight
 
   def all_moves(position = @position)
     moves = []
-    moves[0] = [position[0] + 2,position[1] + 1]
-    moves[1] = [position[0] + 2,position[1] - 1]
-    moves[2] = [position[0] - 2,position[1] + 1]
-    moves[3] = [position[0] - 2,position[1] - 1]
-    moves[4] = [position[0] + 1,position[1] + 2]
-    moves[5] = [position[0] - 1,position[1] + 2]
-    moves[6] = [position[0] + 1,position[1] - 2]
-    moves[7] = [position[0] - 1,position[1] - 2]
+    moves[0] = [position[0] + 2, position[1] + 1]
+    moves[1] = [position[0] + 2, position[1] - 1]
+    moves[2] = [position[0] - 2, position[1] + 1]
+    moves[3] = [position[0] - 2, position[1] - 1]
+    moves[4] = [position[0] + 1, position[1] + 2]
+    moves[5] = [position[0] - 1, position[1] + 2]
+    moves[6] = [position[0] + 1, position[1] - 2]
+    moves[7] = [position[0] - 1, position[1] - 2]
     moves
   end
 end
 
+# class with methods to run game
 class Game
-
   def initialize
     @knight = Knight.new
     @board = Board.new
-    @start = [0,0]
-    @target = [0,0]
+    @start = [0, 0]
+    @target = [0, 0]
   end
 
   def move_piece(position)
     all_moves = @knight.all_moves(position)
-    valid_moves = all_moves.select { |move| onboard(move) && !@board.square_visited(move) }
+    all_moves.select { |move| onboard(move) && !@board.square_visited(move) }
   end
 
   def onboard(coord)
@@ -86,66 +87,52 @@ class Game
   # main method for assigning start and target and initiating moves
   def knight_moves(start, target)
     return 0 unless check_inputs(start, target)
-    @board.print_board
+
     @start = start
     @target = target
 
     node = Node.new(start, nil)
-    find_path(node)
-
+    find_path([node])
   end
 
+  # find path from start to target
   def find_path(nodes)
-
     node_array = []
 
     nodes.each do |node|
       moves = move_piece(node.position)
-      return if moves.length == 0
-      
-      p moves
-      moves.each do |new_position|
       parent = node
-      node = Node.new(new_position, parent)
-      node_array.push(node)
-      print "Node position #{node.position} \n"
-      print "Node parent position #{node.parent.position} \n"
-    end
-
-    p node_array
-
-    node_array.each do |node|
-      if node.position == @target
-        print "Congratulations target found \n"
-        print_path(node)
-        return
+      moves.each do |new_position|
+        node = Node.new(new_position, parent)
+        node_array.push(node)
       end
     end
 
-    print "Go deeper \n"
+    return if node_array.length == 0
+
+    node_array.each do |node|
+      if node.position == @target
+        print "\nCongratulations! The knight has made it to the target. \n"
+        print_path(node)
+        break
+      end
+    end
+
     find_path(node_array)
-    
   end
 
   def print_path(node)
     str = ""
+    cnt = 0
     while node.parent
-      str.prepend(node.position.to_s)
+      str.prepend(node.position.to_s).prepend(" -> ")
       node = node.parent
-      print "Path: #{str} \n"
+      cnt += 1
     end
-    print "Path: #{str} \n"
+    str.prepend(node.position.to_s)
+    print "Found in #{cnt} moves: #{str} \n\n"
   end
 end
 
-# board = Board.new
-# board.print_board
-
-# board.board[2][2] = 'x'
-# board.print_board
-
-# p board.square_visited([2,2])
-
 game = Game.new
-game.knight_moves([0,0],[3,3])
-
+game.knight_moves([0, 7], [7, 0])
