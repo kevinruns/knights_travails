@@ -95,26 +95,36 @@ class Game
 
   end
 
-  def find_path(node)
-    moves = move_piece(node.position)
-    return if moves.length == 0
-    p moves
-# create node array? to process each turn????
-    moves.each do |new_position|
+  def find_path(nodes)
+
+    node_array = []
+
+    nodes.each do |node|
+      moves = move_piece(node.position)
+      return if moves.length == 0
+      
+      p moves
+      moves.each do |new_position|
       parent = node
       node = Node.new(new_position, parent)
+      node_array.push(node)
       print "Node position #{node.position} \n"
       print "Node parent position #{node.parent.position} \n"
+    end
 
-      if new_position == @target
+    p node_array
+
+    node_array.each do |node|
+      if node.position == @target
         print "Congratulations target found \n"
         print_path(node)
         return
-      else
-        print "Go deeper #{node.position}\n"
-        find_path(node)
       end
     end
+
+    print "Go deeper \n"
+    find_path(node_array)
+    
   end
 
   def print_path(node)
